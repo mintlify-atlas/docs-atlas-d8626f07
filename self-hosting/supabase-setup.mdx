@@ -1,0 +1,266 @@
+---
+title: "Supabase setup"
+description: "Create a Supabase project, build the database schema, configure storage, set Row Level Security policies, and enable Google OAuth for Snippet."
+---
+
+Snippet uses Supabase for three things: user authentication (via Google OAuth), the PostgreSQL database that stores groups, tracks, and membership records, and the `mp4` storage bucket that holds the uploaded audio files. Complete every section below before you configure environment variables or deploy.
+
+## Create a Supabase project
+
+<Steps>
+  <Step title="Create the project">
+    Go to [supabase.com](https://supabase.com) and sign in. Click **New project**, choose an organization, enter a project name (for example, `snippet`), set a strong database password, and select the region closest to your users. Click **Create new project** and wait for provisioning to finish (usually under two minutes).
+  </Step>
+
+  <Step title="Open the SQL editor">
+    In the Supabase dashboard, click **SQL Editor** in the left sidebar. You will run all of the SQL in the sections below using the editor's **Run** button.
+  </Step>
+</Steps>
+
+## Create the database tables
+
+Run each `CREATE TABLE` statement below in the SQL editor. The column types and nullability are derived directly from the TypeScript types in `database.types.ts`.
+
+### `groups`
+
+Stores music-sharing groups created by users.
+
+```sql
+CREATE TABLE public.groups (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name        text NOT NULL,
+  description text,
+  created_by  uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+```
+
+### `group_members`
+
+Tracks which users belong to which groups. Both `group_id` and `member_id` together act as the effective primary key.
+
+```sql
+CREATE TABLE public.group_members (
+  group_id   uuid NOT NULL REFERENCES public.groups(id) ON DELETE CASCADE,
+  member_id  uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  joined_at  timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (group_id, member_id)
+);
+```
+
+### `tracks`
+
+Stores metadata for every uploaded audio file. `file_path` and `file_url` point to the object in the `mp4` storage bucket.
+
+```sql
+CREATE TABLE public.tracks (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  title       text NOT NULL,
+  artist      text NOT NULL,
+  group_id    uuid NOT NULL REFERENCES public.groups(id) ON DELETE CASCADE,
+  uploaded_by uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  file_path   text NOT NULL,
+  file_url    text NOT NULL,
+  file_type   text NOT NULL,
+  file_size   bigint NOT NULL,
+  upload_date timestamptz DEFAULT now(),
+  album       text,
+  duration    numeric,
+  genre       text,
+  plays       integer DEFAULT 0,
+  year        integer
+);
+```
+
+### `user_uploads`
+
+Records shareable upload links that are associated with a user and an optional group.
+
+```sql
+CREATE TABLE public.user_uploads (
+  user_id     uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  upload_link text NOT NULL,
+  group_id    uuid REFERENCES public.groups(id) ON DELETE SET NULL,
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+```
+
+## Create the `users_view` view
+
+Snippet queries user emails without direct access to `auth.users`. The view below exposes only the `id` and `email` columns from the Supabase auth schema and is used by the `getGroupMembers` server action together with the service role key.
+
+```sql
+CREATE OR REPLACE VIEW public.users_view AS
+  SELECT id, email
+  FROM auth.users;
+```
+
+<Note>
+  The service role key bypasses Row Level Security, which is why `users_view` is only queried from server-side code using `SUPABASE_SERVICE_ROLE_KEY`. Never expose the service role key to the browser.
+</Note>
+
+## Create the `get_tracks_with_user_emails` function
+
+This database function returns track rows for a group joined with the uploader's email in a single round-trip.
+
+```sql
+CREATE OR REPLACE FUNCTION public.get_tracks_with_user_emails(p_group_id uuid)
+RETURNS json[]
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
+  SELECT array_agg(
+    row_to_json(t.*) || jsonb_build_object('email', u.email)
+  )
+  FROM public.tracks t
+  LEFT JOIN public.users_view u ON u.id = t.uploaded_by
+  WHERE t.group_id = p_group_id;
+$$;
+```
+
+## Create the storage bucket
+
+<Steps>
+  <Step title="Open Storage">
+    In the Supabase dashboard, click **Storage** in the left sidebar, then click **New bucket**.
+  </Step>
+
+  <Step title="Create the mp4 bucket">
+    Set the bucket name to `mp4` exactly — the application hard-codes this name. Enable the **Public bucket** toggle so that uploaded file URLs are publicly accessible without a signed URL. Click **Save**.
+  </Step>
+</Steps>
+
+<Warning>
+  Making the bucket public means anyone with a file URL can download the audio file directly. If you want private storage you would need to modify the application to generate signed URLs before serving them.
+</Warning>
+
+## Set up Row Level Security
+
+Run these policies in the SQL editor. They require a valid authenticated session for all write operations and restrict reads to group members.
+
+```sql
+-- Enable RLS on all tables
+ALTER TABLE public.groups ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.group_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.tracks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_uploads ENABLE ROW LEVEL SECURITY;
+
+-- groups: any authenticated user can create a group
+CREATE POLICY "Authenticated users can create groups"
+  ON public.groups FOR INSERT
+  TO authenticated
+  WITH CHECK (true);
+
+-- groups: members can read groups they belong to
+CREATE POLICY "Members can view their groups"
+  ON public.groups FOR SELECT
+  TO authenticated
+  USING (
+    id IN (
+      SELECT group_id FROM public.group_members
+      WHERE member_id = auth.uid()
+    )
+  );
+
+-- group_members: authenticated users can join a group (insert themselves)
+CREATE POLICY "Authenticated users can join groups"
+  ON public.group_members FOR INSERT
+  TO authenticated
+  WITH CHECK (member_id = auth.uid());
+
+-- group_members: members can view membership of their own groups
+CREATE POLICY "Members can view group membership"
+  ON public.group_members FOR SELECT
+  TO authenticated
+  USING (
+    group_id IN (
+      SELECT group_id FROM public.group_members
+      WHERE member_id = auth.uid()
+    )
+  );
+
+-- tracks: group members can upload tracks
+CREATE POLICY "Group members can insert tracks"
+  ON public.tracks FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    group_id IN (
+      SELECT group_id FROM public.group_members
+      WHERE member_id = auth.uid()
+    )
+  );
+
+-- tracks: group members can read tracks in their groups
+CREATE POLICY "Group members can view tracks"
+  ON public.tracks FOR SELECT
+  TO authenticated
+  USING (
+    group_id IN (
+      SELECT group_id FROM public.group_members
+      WHERE member_id = auth.uid()
+    )
+  );
+
+-- Storage: authenticated users can upload to the mp4 bucket
+CREATE POLICY "Authenticated users can upload audio"
+  ON storage.objects FOR INSERT
+  TO authenticated
+  WITH CHECK (bucket_id = 'mp4');
+
+-- Storage: public read access for the mp4 bucket
+CREATE POLICY "Public can read audio files"
+  ON storage.objects FOR SELECT
+  TO public
+  USING (bucket_id = 'mp4');
+```
+
+## Enable Google OAuth
+
+Snippet's login page calls `supabase.auth.signInWithOAuth({ provider: 'google' })`. You need to configure the Google provider in both Google Cloud Console and the Supabase dashboard.
+
+<Steps>
+  <Step title="Create a Google OAuth client">
+    1. Go to the [Google Cloud Console](https://console.cloud.google.com/) and open or create a project.
+    2. Navigate to **APIs & Services → Credentials**.
+    3. Click **Create Credentials → OAuth 2.0 Client ID**.
+    4. Set the application type to **Web application**.
+    5. Under **Authorized redirect URIs**, add your Supabase callback URL:
+
+    ```
+    https://<your-project-ref>.supabase.co/auth/v1/callback
+    ```
+
+    Replace `<your-project-ref>` with the reference ID shown in your Supabase project URL.
+
+    6. Click **Create** and copy the **Client ID** and **Client Secret**.
+  </Step>
+
+  <Step title="Enable Google in Supabase">
+    In the Supabase dashboard, go to **Authentication → Providers** and click **Google**. Toggle it on, paste in the **Client ID** and **Client Secret** from the previous step, and click **Save**.
+  </Step>
+
+  <Step title="Add your site URL">
+    In the Supabase dashboard, go to **Authentication → URL Configuration**. Set **Site URL** to your deployment URL (for example, `https://snippet.yourdomain.com`). Add the same URL plus `/auth/callback` to the **Redirect URLs** list:
+
+    ```
+    https://snippet.yourdomain.com/auth/callback
+    ```
+
+    For local development, also add `http://localhost:3000/auth/callback`.
+  </Step>
+</Steps>
+
+## Get your project credentials
+
+You will need these values when configuring environment variables:
+
+1. In the Supabase dashboard, go to **Project Settings → API**.
+2. Copy the **Project URL** — this is your `NEXT_PUBLIC_SUPABASE_URL`.
+3. Copy the **anon / public** key — this is your `NEXT_PUBLIC_SUPABASE_KEY`.
+4. Copy the **service_role** key — this is your `SUPABASE_SERVICE_ROLE_KEY`.
+
+<Warning>
+  The service role key has full database access and bypasses all RLS policies. Never commit it to source control or expose it in client-side code.
+</Warning>
+
+Next, set these values as environment variables: [Environment variables →](/self-hosting/environment-variables)

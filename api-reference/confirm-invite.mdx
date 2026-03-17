@@ -1,0 +1,81 @@
+---
+title: 'Confirm invite'
+description: 'Add an authenticated user to a group using a group invite link.'
+---
+
+The `/api/confirm-invite` endpoint completes the invite flow by inserting the authenticated user into `group_members`.
+
+## How the invite flow works
+
+<Steps>
+  <Step title="Share the invite link">
+    A group member shares a link of the form `/invite_user?group_id=<group-uuid>` with someone they want to invite.
+  </Step>
+  <Step title="Recipient opens the link">
+    The `/invite_user` page loads in the recipient's browser. It reads `group_id` from the query string and validates that the group exists by querying the `groups` table directly via the Supabase client.
+  </Step>
+  <Step title="Authentication check">
+    If the recipient is not signed in, the page redirects them to `/login?redirect=/invite_user?group_id=<group-uuid>`. After signing in, they are returned to the invite page automatically.
+  </Step>
+  <Step title="Confirm invite API called">
+    The page calls `POST /api/confirm-invite` with the authenticated user's UUID and the group UUID.
+  </Step>
+  <Step title="Member record created">
+    The server inserts a row into `group_members` linking `user_id` → `group_id`. The recipient is redirected to `/dashboard` on success.
+  </Step>
+</Steps>
+
+---
+
+## POST /api/confirm-invite
+
+Inserts the specified user into the specified group's member list.
+
+### Request body
+
+<ParamField body="user_id" type="string" required>
+  UUID of the authenticated user to add to the group. This must be the UUID of the currently signed-in session.
+</ParamField>
+
+<ParamField body="group_id" type="string" required>
+  UUID of the group the user is joining.
+</ParamField>
+
+### Response
+
+**200 OK**
+
+```json
+{ "text": "success" }
+```
+
+**Error responses**
+
+| Status | Body | Cause |
+|--------|------|-------|
+| `500` | `{ "error": "Missing user id or group id" }` | Either `user_id` or `group_id` was not provided in the request body |
+| `500` | `{ "error": "<database error message>" }` | The Supabase insert failed, e.g. because the user is already a member |
+
+<Note>
+  The endpoint returns `500` (not `400`) when required fields are missing — this matches the current implementation.
+</Note>
+
+### Example
+
+```bash
+curl -X POST 'https://<your-domain>/api/confirm-invite' \
+  --cookie 'sb-access-token=<session-cookie>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "user_id": "a1b2c3d4-0000-0000-0000-000000000001",
+    "group_id": "g1g2g3g4-0000-0000-0000-000000000001"
+  }'
+```
+
+```json
+{ "text": "success" }
+```
+
+<Warning>
+  If you call this endpoint for a user who is already a member of the group, the database will return a unique-constraint error and the endpoint will respond with `500`. The `/invite_user` page surfaces this as "You may already be a member."
+</Warning>

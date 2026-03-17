@@ -1,0 +1,104 @@
+---
+title: Music library
+description: Browse, search, and play every track you have uploaded or that has been shared with you across all your groups.
+---
+
+The **Library** is a unified view of your music on Snippet. It surfaces every track tied to your account in two separate tabs: tracks you uploaded yourself, and all tracks shared across the groups you belong to.
+
+## What the library shows
+
+<CardGroup cols={2}>
+  <Card title="My Uploads" icon="upload">
+    Every track you have personally uploaded, ordered by upload date (newest first). Only tracks you created appear here.
+  </Card>
+  <Card title="Shared With Me" icon="users">
+    All tracks from every group you are a member of, ordered by upload date. This includes your own uploads and those from other members.
+  </Card>
+</CardGroup>
+
+## Browsing the library
+
+Navigate to **Library** in the sidebar. The page opens on the **My Uploads** tab by default.
+
+Each track row shows:
+
+| Column | Description |
+|---|---|
+| # | Row number |
+| Title | Track title |
+| Artist | Artist name |
+| Duration | Track duration (when available) |
+
+The **Shared With Me** tab adds a **Shared By** column showing the uploader's identity.
+
+Hover over any row to reveal the play icon and the row action menu (three dots).
+
+## Playing a track
+
+Hover over a track row. The album art thumbnail switches from a music note icon to a **Play** button. Click it to start playback.
+
+<Note>
+  Inline playback is triggered directly from the library row. You do not need to navigate away from the library to listen to a track.
+</Note>
+
+## Searching for tracks
+
+Track search runs against both the `title` and `artist` fields using a case-insensitive substring match. The underlying `searchTracks` server action issues the following query:
+
+```typescript
+supabase
+  .from('tracks')
+  .select()
+  .or(`title.ilike.%${query}%,artist.ilike.%${query}%`)
+  .order('upload_date', { ascending: false })
+```
+
+This means a search for `"blue"` will match tracks titled *Feeling Blue* as well as tracks by an artist named *Blue October*.
+
+## Viewing which group a track belongs to
+
+In the **Shared With Me** tab, tracks include their originating group name. The `getTracksFromAllGroups` action joins the `tracks` table with the `groups` table and attaches the `group_name` to each track record.
+
+To go directly to a group's track list, open the **Groups** section on your dashboard and click the relevant group card.
+
+## Recently uploaded — dashboard section
+
+The **Dashboard** shows a **Recently Uploaded** section below your group grid. This section displays the latest tracks from all groups you belong to, using the same `getTracksFromAllGroups` query ordered by `upload_date` descending.
+
+Each card in this section shows:
+
+- Track title and artist
+- The group the track was shared in ("Shared in *Group Name*")
+- A **Play** button
+
+<Tip>
+  The **Recently Uploaded** section is a quick way to catch up on new tracks without navigating into individual groups.
+</Tip>
+
+## Track actions
+
+From the per-row dropdown menu (visible on hover) you can:
+
+<Tabs>
+  <Tab title="My Uploads">
+    - **Download** — save the file to your device
+    - **Edit Details** — update track metadata
+    - **Delete** — remove the track
+  </Tab>
+  <Tab title="Shared With Me">
+    - **Download** — save the file to your device
+    - **Add to Playlist** — add to a playlist (coming soon)
+    - **View Details** — inspect full track metadata
+  </Tab>
+</Tabs>
+
+## Related pages
+
+<CardGroup cols={2}>
+  <Card title="Uploading tracks" icon="upload" href="/features/uploading-tracks">
+    Add new MP3 or MP4 files to a group.
+  </Card>
+  <Card title="Groups" icon="users" href="/features/groups">
+    View and manage your music-sharing circles.
+  </Card>
+</CardGroup>

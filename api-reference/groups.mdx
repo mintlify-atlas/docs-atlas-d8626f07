@@ -1,0 +1,143 @@
+---
+title: 'Groups'
+description: 'Fetch group memberships and create new groups.'
+---
+
+The `/api/groups` endpoint handles two operations: listing the groups a user belongs to and creating a new group.
+
+---
+
+## GET /api/groups
+
+Returns all group memberships for a given user, including nested group details.
+
+### Query parameters
+
+<ParamField query="user_id" type="string" required>
+  The UUID of the authenticated user. Must match the currently signed-in session.
+</ParamField>
+
+### Response
+
+**200 OK**
+
+<ResponseField name="data" type="object[]">
+  Array of group membership records.
+  <Expandable title="properties">
+    <ResponseField name="member_id" type="string">
+      UUID of the member (matches the `user_id` query parameter).
+    </ResponseField>
+    <ResponseField name="group_id" type="string">
+      UUID of the group.
+    </ResponseField>
+    <ResponseField name="joined_at" type="string">
+      ISO 8601 timestamp of when the user joined the group.
+    </ResponseField>
+    <ResponseField name="groups" type="object">
+      Nested group record.
+      <Expandable title="properties">
+        <ResponseField name="id" type="string">
+          UUID of the group.
+        </ResponseField>
+        <ResponseField name="name" type="string">
+          Display name of the group.
+        </ResponseField>
+        <ResponseField name="created_by" type="string">
+          Email address of the user who created the group.
+        </ResponseField>
+        <ResponseField name="description" type="string">
+          Optional description of the group.
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+**500 Internal Server Error**
+
+```json
+{ "error": "error fetching groups" }
+```
+
+### Example
+
+```bash
+curl 'https://<your-domain>/api/groups?user_id=<user-uuid>' \
+  --cookie 'sb-access-token=<session-cookie>'
+```
+
+```json
+{
+  "data": [
+    {
+      "member_id": "a1b2c3d4-0000-0000-0000-000000000001",
+      "group_id": "g1g2g3g4-0000-0000-0000-000000000001",
+      "joined_at": "2024-01-15T10:30:00.000Z",
+      "groups": {
+        "id": "g1g2g3g4-0000-0000-0000-000000000001",
+        "name": "Weekend Beats",
+        "created_by": "alice@example.com",
+        "description": "Our weekend jam session group"
+      }
+    }
+  ]
+}
+```
+
+---
+
+## POST /api/groups
+
+Creates a new group and adds the creator as its first member.
+
+### Request body
+
+<ParamField body="name" type="string" required>
+  Display name for the new group.
+</ParamField>
+
+<ParamField body="description" type="string" required>
+  A short description of the group.
+</ParamField>
+
+<ParamField body="userEmail" type="string" required>
+  Email address of the authenticated user. Stored as the `created_by` value on the group.
+</ParamField>
+
+<ParamField body="userId" type="string" required>
+  UUID of the authenticated user. Used to add the creator as the first `group_members` record.
+</ParamField>
+
+### Response
+
+**200 OK**
+
+Returns an empty JSON object on success.
+
+```json
+{}
+```
+
+**500 Internal Server Error**
+
+```json
+{ "error": "<database error message>" }
+```
+
+### Example
+
+```bash
+curl -X POST 'https://<your-domain>/api/groups' \
+  --cookie 'sb-access-token=<session-cookie>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "name": "Weekend Beats",
+    "description": "Our weekend jam session group",
+    "userEmail": "alice@example.com",
+    "userId": "a1b2c3d4-0000-0000-0000-000000000001"
+  }'
+```
+
+<Note>
+  The endpoint generates a UUID (`v4`) for the new group server-side — you do not need to supply one.
+</Note>

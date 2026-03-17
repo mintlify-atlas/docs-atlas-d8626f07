@@ -1,80 +1,95 @@
 ---
 title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+description: "Create your account, set up a group, and share your first track in under 5 minutes."
 ---
 
-## Get started in three steps
+<Note>
+  Snippet uses Google OAuth for authentication. You need a Google account to sign in — there is no email/password option.
+</Note>
 
-Get your documentation site running locally and make your first customization.
+<Steps>
+  <Step title="Sign in with Google">
+    Navigate to `/login` on your Snippet instance. Click **Continue with Google** and complete the OAuth flow.
 
-### Step 1: Set up your local environment
+    After authenticating, you are redirected to `/dashboard` where you can see your groups and recently uploaded tracks.
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+    <Tip>
+      If you received an invite link to join a group, click it before signing in. The invite link includes a redirect parameter that automatically adds you to the group after you authenticate.
+    </Tip>
+  </Step>
 
-### Step 2: Deploy your changes
+  <Step title="Create your first group">
+    From the dashboard, click **Create Group** in the top-right of the **Your Groups** section.
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    Fill in the form:
+    - **Group Name** (required) — a short name for your music circle, e.g. `Road Trip Playlist`
+    - **Description** (optional) — describe what the group is for
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+    Click **Create Group** to confirm. Your new group appears on the dashboard immediately.
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+    <Info>
+      The group is private by default. No one can find or join it without an invite link from you.
+    </Info>
+  </Step>
 
-### Step 3: Go live
+  <Step title="Upload your first track">
+    Open your group by clicking it on the dashboard. Inside the group page, click **Upload Track**.
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+    In the upload dialog:
+    1. Click **Select File** (or drag and drop) and choose an MP3 or MP4 file up to 50 MB.
+    2. Enter a **Track Title** — the display name for the track.
+    3. Enter the **Artist** name.
+    4. Choose a **Group** from the dropdown (pre-selected if you opened the dialog from a group page).
+    5. Click **Upload Track**.
 
-## Next steps
+    The file is uploaded to Supabase storage and the track metadata is saved to the database. Once complete, the track appears in the group's track list.
 
-Now that you have your docs running, explore these key features:
+    ```
+    Accepted formats: .mp3, .mp4 (audio/mpeg, audio/mp4, video/mp4)
+    Maximum file size: 50 MB
+    ```
+  </Step>
+
+  <Step title="Play a track">
+    Inside a group, click on any track to start playback. Tracks stream directly in your browser — no download required.
+
+    To download a track to your device, use the download button on the track card.
+  </Step>
+
+  <Step title="Invite a friend">
+    From your group page, click **Invite Members**.
+
+    A dialog appears with a unique invite link for that group:
+
+    ```
+    https://your-domain.com/invite_user?group_id=<group-uuid>
+    ```
+
+    Click the copy button to copy the link to your clipboard, then share it with your friend via any channel (message, email, etc.).
+
+    When your friend opens the link:
+    - If they are already signed in, they are added to the group immediately.
+    - If they are not signed in, they are redirected to the login page. After authenticating with Google, they are automatically added to the group and redirected to it.
+
+    <Warning>
+      Anyone with the invite link can join the group. Keep it private and do not post it publicly if you want to control membership.
+    </Warning>
+  </Step>
+</Steps>
+
+## What's next?
 
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Manage groups" icon="users" href="/features/groups">
+    Learn how to view members, manage group tracks, and organize your music circles.
+  </Card>
+  <Card title="Upload tracks" icon="arrow-up-from-bracket" href="/features/uploading-tracks">
+    Understand supported formats, size limits, and how file storage works.
+  </Card>
+  <Card title="Music library" icon="list-music" href="/features/music-library">
+    Browse and search all tracks across your groups in one place.
+  </Card>
+  <Card title="Invite members" icon="user-plus" href="/features/inviting-members">
+    Deep-dive into the invite flow and member management.
+  </Card>
 </CardGroup>
-
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>

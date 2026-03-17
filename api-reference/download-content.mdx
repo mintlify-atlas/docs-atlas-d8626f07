@@ -1,0 +1,74 @@
+---
+title: 'Download content'
+description: 'Download audio tracks from Supabase storage.'
+---
+
+Downloading a track in Snippet is handled by the `downloadMedia` server action rather than a full HTTP endpoint. The `/api/download-content` route exists as a stub and currently returns an empty object.
+
+<Note>
+  The `GET /api/download-content` route returns `{}` and has no query parameters. Actual file downloads use direct Supabase public storage URLs or the `downloadMedia` server action described below.
+</Note>
+
+---
+
+## GET /api/download-content
+
+Stub endpoint. Returns an empty JSON object.
+
+**Response**
+
+```json
+{}
+```
+
+This route does not accept parameters and performs no storage operations. You can use it as a health-check for the `/api/download-content` path, but it returns no useful data.
+
+---
+
+## `downloadMedia` server action
+
+The `downloadMedia` server action is the recommended way to download a track programmatically. It retrieves the file as a `Blob` from the Supabase `mp4` storage bucket.
+
+**Location:** `src/lib/actions.ts`
+
+### Parameters
+
+<ParamField body="url" type="string" required>
+  The storage path of the file within the `mp4` bucket, e.g. `uploads/1718000000000-abc123xyz.mp3`. This is the `filePath` value returned when the track was uploaded — not the full public URL.
+</ParamField>
+
+### Return value
+
+Returns the file as a `Blob` on success, or `null` if the download fails.
+
+### Example (TypeScript)
+
+```typescript
+import { downloadMedia } from '@/lib/actions';
+
+const blob = await downloadMedia('uploads/1718000000000-abc123xyz.mp3');
+
+if (!blob) {
+  console.error('Download failed');
+} else {
+  // Create a browser download
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'track.mp3';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+```
+
+### Direct public URL
+
+For playback or linking, use the `fileUrl` stored on the track record. This is a public Supabase storage URL and does not require authentication:
+
+```
+https://<project>.supabase.co/storage/v1/object/public/mp4/uploads/<filename>
+```
+
+<Tip>
+  If you only need to stream a track (not save it to disk), use the `fileUrl` directly in an `<audio>` element. Reserve `downloadMedia` for cases where you need the `Blob` in memory, such as client-side processing.
+</Tip>

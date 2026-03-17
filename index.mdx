@@ -1,97 +1,80 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "Snippet"
+description: "Share MP3 files with your friends through private music groups."
 ---
 
-## Setting up
-
-Get your documentation site up and running in minutes.
-
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Get started" icon="rocket" href="/quickstart">
+    Create your account and share your first track in minutes.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Create a group" icon="users" href="/features/groups">
+    Set up a private music sharing circle with your friends.
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Upload tracks" icon="music" href="/features/uploading-tracks">
+    Upload MP3 files and add them to your groups.
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="API reference" icon="code" href="/api-reference/overview">
+    Explore the REST API and server actions.
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## What is Snippet?
 
-Everything you need to create world-class documentation.
+Snippet is a private music sharing platform that lets you upload MP3 files and share them with your friends through invite-only groups. Think of it as a personal music locker shared between a circle of friends — no public feeds, no algorithms, just music you want to share with the people you choose.
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
+<CardGroup cols={3}>
+  <Card title="Private groups" icon="lock">
+    Create invite-only groups and control who can access your shared music.
   </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
+  <Card title="MP3 uploads" icon="arrow-up-from-bracket">
+    Upload audio files directly from your device, stored securely in the cloud.
   </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
+  <Card title="In-browser playback" icon="play">
+    Stream tracks instantly in the browser — no downloads required.
   </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
+  <Card title="Music library" icon="list-music">
+    Browse and search all tracks shared across your groups in one place.
   </Card>
-</Columns>
+  <Card title="Invite members" icon="user-plus">
+    Invite friends to groups via email with a single click.
+  </Card>
+  <Card title="Activity dashboard" icon="gauge">
+    See recently uploaded tracks from all your groups at a glance.
+  </Card>
+</CardGroup>
 
-## Need inspiration?
+## How it works
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+<Steps>
+  <Step title="Create an account">
+    Sign up with your email address. Snippet uses Supabase Auth for secure, passwordless login.
+  </Step>
+  <Step title="Create or join a group">
+    Create a new music sharing group and invite your friends, or accept an invitation to join an existing group.
+  </Step>
+  <Step title="Upload tracks">
+    Upload MP3 files to a group. Add a title and artist name to keep your library organized.
+  </Step>
+  <Step title="Listen and share">
+    Play tracks directly in the browser. Every member of the group can hear what's been shared.
+  </Step>
+</Steps>
+
+## Self-hosting
+
+Snippet is open source and designed to be self-hosted. You bring your own Supabase project and deploy to Vercel (or any Next.js-compatible host) in minutes.
+
+<CardGroup cols={2}>
+  <Card title="Self-hosting overview" icon="server" href="/self-hosting/overview">
+    Understand the architecture and what you need to run Snippet yourself.
+  </Card>
+  <Card title="Supabase setup" icon="database" href="/self-hosting/supabase-setup">
+    Configure your Supabase project with the required tables and storage buckets.
+  </Card>
+  <Card title="Environment variables" icon="key" href="/self-hosting/environment-variables">
+    All the environment variables you need to configure.
+  </Card>
+  <Card title="Deployment" icon="cloud-arrow-up" href="/self-hosting/deployment">
+    Deploy to Vercel or any Next.js-compatible platform.
+  </Card>
+</CardGroup>

@@ -1,0 +1,153 @@
+---
+title: 'Upload file'
+description: 'Upload an audio file to Supabase storage and record the track in the database.'
+---
+
+Uploading a track is a two-step process:
+
+1. **POST /api/upload-file** — uploads the file to Supabase storage and returns metadata.
+2. **`uploadMusic` server action** — uses that metadata to insert a record into the `tracks` table.
+
+---
+
+## POST /api/upload-file
+
+Accepts a `multipart/form-data` request containing an audio file, uploads it to the `mp4` Supabase storage bucket, and returns the file metadata.
+
+<Warning>
+  The endpoint returns `401` if you are not signed in. Make sure your session cookie is present before calling this endpoint.
+</Warning>
+
+### Request
+
+Send the file as `multipart/form-data` with the field name `file`.
+
+<ParamField body="file" type="File" required>
+  The audio file to upload. The server preserves the original file extension and generates a unique filename of the form `uploads/<timestamp>-<random>.<ext>`.
+</ParamField>
+
+### Response
+
+**200 OK**
+
+<ResponseField name="filePath" type="string">
+  Path within the `mp4` bucket, e.g. `uploads/1718000000000-abc123xyz.mp3`.
+</ResponseField>
+
+<ResponseField name="fileUrl" type="string">
+  Public URL you can use to stream or download the file.
+</ResponseField>
+
+<ResponseField name="fileType" type="string">
+  MIME type of the uploaded file, e.g. `audio/mpeg`.
+</ResponseField>
+
+<ResponseField name="fileSize" type="number">
+  File size in bytes.
+</ResponseField>
+
+<ResponseField name="fileName" type="string">
+  Original filename as provided by the client.
+</ResponseField>
+
+**Error responses**
+
+| Status | Body | Cause |
+|--------|------|-------|
+| `400` | `{ "error": "No file provided" }` | `file` field missing from form data |
+| `401` | `{ "error": "Unauthorized. User must be logged in to upload files." }` | No valid session |
+| `500` | `{ "error": "<storage error message>" }` | Supabase storage failure |
+
+### Example
+
+```bash
+curl -X POST 'https://<your-domain>/api/upload-file' \
+  --cookie 'sb-access-token=<session-cookie>' \
+  --form 'file=@/path/to/track.mp3'
+```
+
+```json
+{
+  "filePath": "uploads/1718000000000-abc123xyz.mp3",
+  "fileUrl": "https://<project>.supabase.co/storage/v1/object/public/mp4/uploads/1718000000000-abc123xyz.mp3",
+  "fileType": "audio/mpeg",
+  "fileSize": 4823142,
+  "fileName": "track.mp3"
+}
+```
+
+<Tip>
+  The `mp4` bucket name is a Supabase storage bucket configured in your project — it accepts any audio file type despite the name.
+</Tip>
+
+---
+
+## `uploadMusic` server action
+
+After the file is stored, call the `uploadMusic` Next.js server action to create the `tracks` record in the database. This action is invoked client-side via React Server Actions and is documented here for self-hosters.
+
+**Location:** `src/lib/actions.ts`
+
+### Parameters
+
+<ParamField body="fileMetadata" type="object" required>
+  The object returned by `POST /api/upload-file`.
+  <Expandable title="properties">
+    <ParamField body="filePath" type="string" required>
+      Storage path within the `mp4` bucket.
+    </ParamField>
+    <ParamField body="fileUrl" type="string" required>
+      Public URL of the stored file.
+    </ParamField>
+    <ParamField body="fileType" type="string" required>
+      MIME type of the file.
+    </ParamField>
+    <ParamField body="fileSize" type="number" required>
+      File size in bytes.
+    </ParamField>
+    <ParamField body="fileName" type="string" required>
+      Original filename.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="title" type="string" required>
+  Track title displayed in the library.
+</ParamField>
+
+<ParamField body="artist" type="string" required>
+  Artist name displayed in the library.
+</ParamField>
+
+<ParamField body="groupId" type="string" required>
+  UUID of the group this track belongs to.
+</ParamField>
+
+### Behavior
+
+The action:
+
+1. Verifies the current user is authenticated.
+2. Inserts a row into the `tracks` table with the provided metadata, the current user's ID as `uploaded_by`, and the current timestamp as `upload_date`.
+3. Calls `revalidatePath` to invalidate the dashboard, group, and library pages so the new track appears immediately.
+
+### Return value
+
+Returns `{ success: true, track: <inserted track row> }` on success, or throws an `Error` with a descriptive message on failure.
+
+### Example (TypeScript)
+
+```typescript
+import { uploadMusic } from '@/lib/actions';
+
+const metadata = await uploadFileViaApi(file); // calls POST /api/upload-file
+
+const result = await uploadMusic(
+  metadata,
+  'My New Track',
+  'DJ Example',
+  'g1g2g3g4-0000-0000-0000-000000000001'
+);
+
+console.log(result.track.id); // UUID of the new track record
+```

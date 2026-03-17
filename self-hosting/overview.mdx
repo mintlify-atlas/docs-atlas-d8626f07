@@ -1,0 +1,73 @@
+---
+title: "Self-hosting overview"
+description: "What you need to run your own instance of Snippet: architecture, required services, and a high-level walkthrough of the setup process."
+---
+
+Snippet is a Next.js application that relies on Supabase for authentication, the database, and file storage. You can host the front-end on any platform that supports Node.js or serverless deployments; Vercel is the recommended choice because Snippet was built and tested against it.
+
+## Architecture
+
+The three components that make up a Snippet deployment:
+
+| Component | Technology | Role |
+|---|---|---|
+| Web application | Next.js 14 (App Router) | Serves the UI and runs server actions |
+| Auth & database | Supabase (PostgreSQL + GoTrue) | User accounts, groups, tracks, and upload metadata |
+| File storage | Supabase Storage | Stores the actual audio files in the `mp4` bucket |
+
+All three components communicate over HTTPS. The Next.js application uses the Supabase JavaScript client (`@supabase/ssr`) from both the browser and server-side server actions. A middleware layer runs on every request to refresh the Supabase session cookie before the page renders.
+
+## What you need before you start
+
+- A **Supabase project** (free tier is sufficient for personal use)
+- A **hosting platform** — Vercel is recommended; any platform that can build and serve a Next.js app works
+- A **Google Cloud project** with an OAuth 2.0 client configured (Snippet uses Google as its only auth provider)
+- **Node.js 18+** or **Bun** installed locally if you want to run or build the project on your machine
+
+## High-level setup
+
+<Steps>
+  <Step title="Clone the repository">
+    Fork or clone the Snippet repository to your own GitHub account (or local machine for a self-managed deploy).
+
+    ```bash
+    git clone https://github.com/ehcaw/snippet.git
+    cd snippet
+    ```
+  </Step>
+
+  <Step title="Set up Supabase">
+    Create a Supabase project, run the SQL to create the required tables and views, create the `mp4` storage bucket, configure Row Level Security policies, and enable Google OAuth.
+
+    Full instructions: [Supabase setup](/self-hosting/supabase-setup)
+  </Step>
+
+  <Step title="Configure environment variables">
+    Create a `.env.local` file (for local development) or add the variables to your hosting platform's dashboard. You need your Supabase project URL, the public anon key, and the service role key.
+
+    Full reference: [Environment variables](/self-hosting/environment-variables)
+  </Step>
+
+  <Step title="Deploy">
+    Connect the repository to Vercel (or your chosen platform), add the environment variables in the dashboard, and trigger a deployment. For local development, run `npm run dev`.
+
+    Full instructions: [Deployment](/self-hosting/deployment)
+  </Step>
+</Steps>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Supabase setup" icon="database" href="/self-hosting/supabase-setup">
+    Create tables, configure storage, set RLS policies, and enable Google OAuth.
+  </Card>
+  <Card title="Environment variables" icon="key" href="/self-hosting/environment-variables">
+    Reference for every environment variable Snippet reads at build and runtime.
+  </Card>
+  <Card title="Deployment" icon="rocket" href="/self-hosting/deployment">
+    Deploy to Vercel or run Snippet locally for development.
+  </Card>
+  <Card title="Quickstart" icon="play" href="/quickstart">
+    Once deployed, follow the quickstart to create your first group and upload a track.
+  </Card>
+</CardGroup>

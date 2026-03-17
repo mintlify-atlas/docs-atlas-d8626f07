@@ -1,0 +1,105 @@
+---
+title: "Environment variables"
+description: "Every environment variable that Snippet reads at build time and runtime, where to find each value, and how to set them locally and in production."
+---
+
+Snippet reads three environment variables. All three must be present for the application to start correctly. Set them in a `.env.local` file for local development or in your hosting platform's environment variable dashboard for production deployments.
+
+<Note>
+  Variables prefixed with `NEXT_PUBLIC_` are bundled into the client-side JavaScript and are visible to anyone who inspects the page source. Only use this prefix for values that are safe to expose publicly — Supabase's anon key is designed for this. The service role key must never use this prefix.
+</Note>
+
+## Variables
+
+### `NEXT_PUBLIC_SUPABASE_URL`
+
+| | |
+|---|---|
+| **Required** | Yes |
+| **Used in** | `src/utils/supabase/client.ts`, `src/utils/supabase/server.ts`, `src/utils/supabase/middleware.ts`, `src/lib/actions.ts` |
+| **Exposed to browser** | Yes |
+
+The base URL of your Supabase project. Every Supabase client in the application — browser, server component, and middleware — uses this URL to reach the Supabase REST and Auth APIs.
+
+**Where to find it:** Supabase dashboard → **Project Settings → API → Project URL**.
+
+**Format:**
+```
+NEXT_PUBLIC_SUPABASE_URL=https://<your-project-ref>.supabase.co
+```
+
+---
+
+### `NEXT_PUBLIC_SUPABASE_KEY`
+
+| | |
+|---|---|
+| **Required** | Yes |
+| **Used in** | `src/utils/supabase/client.ts`, `src/utils/supabase/server.ts`, `src/utils/supabase/middleware.ts` |
+| **Exposed to browser** | Yes |
+
+The public anon key for your Supabase project. This key identifies your project and is safe to include in client-side code. It is subject to the Row Level Security policies you have configured on your tables — it does not grant elevated access on its own.
+
+**Where to find it:** Supabase dashboard → **Project Settings → API → Project API keys → anon / public**.
+
+**Format:**
+```
+NEXT_PUBLIC_SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+---
+
+### `SUPABASE_SERVICE_ROLE_KEY`
+
+| | |
+|---|---|
+| **Required** | Yes |
+| **Used in** | `src/lib/actions.ts` (`getGroupMembers` server action) |
+| **Exposed to browser** | No — server-side only |
+
+The service role key for your Supabase project. Snippet uses this key in the `getGroupMembers` server action to query the `users_view` view, which reads email addresses from `auth.users`. The service role key bypasses Row Level Security, so it can access data that the anon key cannot.
+
+<Warning>
+  This key has unrestricted access to your entire Supabase database. Never expose it in client-side code, never prefix it with `NEXT_PUBLIC_`, and never commit it to source control. Treat it like a database root password.
+</Warning>
+
+**Where to find it:** Supabase dashboard → **Project Settings → API → Project API keys → service_role**.
+
+**Format:**
+```
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+---
+
+## Local development setup
+
+Create a `.env.local` file at the root of the repository (next to `package.json`). Next.js loads this file automatically and never bundles it into the production build.
+
+```bash
+# .env.local
+NEXT_PUBLIC_SUPABASE_URL=https://<your-project-ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_KEY=<your-anon-key>
+SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
+```
+
+<Tip>
+  Add `.env.local` to your `.gitignore` file if it is not already there. The default Next.js `.gitignore` excludes all `.env*.local` files.
+</Tip>
+
+## Production setup
+
+For Vercel deployments, add the three variables in **Project Settings → Environment Variables** in the Vercel dashboard. Vercel injects them at build time and at runtime for serverless functions.
+
+For other platforms, consult your platform's documentation for injecting environment variables into a Next.js build. Ensure that:
+
+- `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_KEY` are available at **build time** (they are inlined into the client bundle by Next.js).
+- `SUPABASE_SERVICE_ROLE_KEY` is available at **runtime** only and is not exposed to the browser.
+
+## Summary
+
+| Variable | Required | Browser-safe | Source |
+|---|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Yes | Supabase → Project Settings → API → Project URL |
+| `NEXT_PUBLIC_SUPABASE_KEY` | Yes | Yes | Supabase → Project Settings → API → anon / public |
+| `SUPABASE_SERVICE_ROLE_KEY` | Yes | No | Supabase → Project Settings → API → service_role |

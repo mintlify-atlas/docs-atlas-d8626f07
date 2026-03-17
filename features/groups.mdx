@@ -1,0 +1,90 @@
+---
+title: Groups
+description: Create private music-sharing circles, manage members, and browse shared tracks.
+---
+
+Groups are private music-sharing circles where you and your collaborators upload and listen to tracks together. Each group has its own track list and member roster, and only members can see or add to it.
+
+## Create a group
+
+<Steps>
+  <Step title="Open the Create Group dialog">
+    On your **Dashboard**, click the **Create Group** button in the **Your Groups** section header.
+  </Step>
+  <Step title="Enter a name">
+    Type a name in the **Group Name** field. The name is required and must not be blank.
+  </Step>
+  <Step title="Add a description (optional)">
+    In the **Description** field, describe what the group is for — for example, the genre, project, or the people involved.
+  </Step>
+  <Step title="Submit">
+    Click **Create Group**. The dialog closes and your new group appears immediately in the **Your Groups** grid.
+  </Step>
+</Steps>
+
+<Note>
+  When you create a group, you are automatically added as a member. The group is associated with your email address as its creator.
+</Note>
+
+## View your groups
+
+Your **Dashboard** shows every group you have created or joined in the **Your Groups** section. Each card displays the group name and description.
+
+Click any group card to open the group detail page at `/groups/group?id=<group-id>`.
+
+If you have not joined any groups yet, the dashboard shows a **Create Your First Group** placeholder card that opens the same create dialog.
+
+## View a group's tracks
+
+Opening a group takes you to its detail page. The **Shared Tracks** panel on the left side of the page lists every track uploaded to that group in chronological order.
+
+Each track row shows:
+
+| Field | Description |
+|---|---|
+| Title | The track title entered at upload time |
+| Artist | The artist name entered at upload time |
+| Shared by | Email address of the member who uploaded the track |
+| Date | The date the track was uploaded |
+
+Click **Download** on any track row to save the file to your device.
+
+## Group member management
+
+The **Members** panel on the right side of the group detail page lists every member of the group.
+
+Each member entry shows:
+
+- **Username** — derived from the member's email address (the part before `@`)
+- **Joined on** — the date they joined the group
+
+The member count is shown in the page header alongside the track count.
+
+<Tip>
+  To add new members, click **Invite Members** in the group header or in the Members panel. See [Inviting Members](/features/inviting-members) for full details.
+</Tip>
+
+## What's stored per group
+
+The following fields are stored in the `groups` table for each group:
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | `string` | Unique group identifier (UUID) |
+| `name` | `string` | Group name |
+| `description` | `string \| null` | Optional description |
+| `created_by` | `string \| null` | Email of the user who created the group |
+| `created_at` | `string` | ISO timestamp of creation |
+
+Membership is tracked in the `group_members` table, which records the `member_id` (user UUID), `group_id`, and `joined_at` timestamp for each member.
+
+## Related pages
+
+<CardGroup cols={2}>
+  <Card title="Uploading tracks" icon="upload" href="/features/uploading-tracks">
+    Add MP3 or MP4 files to a group so members can play and download them.
+  </Card>
+  <Card title="Inviting members" icon="user-plus" href="/features/inviting-members">
+    Share an invite link so others can join your group.
+  </Card>
+</CardGroup>

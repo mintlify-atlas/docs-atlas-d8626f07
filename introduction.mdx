@@ -1,0 +1,118 @@
+---
+title: "Introduction"
+description: "Snipit is a private music sharing platform that lets you upload MP3 files and share them with friends through invite-only groups."
+---
+
+Snipit is a private music sharing platform built for friend groups who want to share audio files with each other — without public feeds, algorithms, or streaming subscriptions getting in the way. You create a group, invite the people you want, upload your tracks, and everyone in the group can listen in the browser.
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Create your account and share your first track in under five minutes.
+  </Card>
+  <Card title="Groups" icon="users" href="/features/groups">
+    Learn how to create and manage your music sharing circles.
+  </Card>
+  <Card title="Uploading tracks" icon="arrow-up-from-bracket" href="/features/uploading-tracks">
+    Upload MP3 and MP4 audio files to any group you belong to.
+  </Card>
+  <Card title="Self-hosting" icon="server" href="/self-hosting/overview">
+    Run your own instance with your own Supabase project and Vercel deployment.
+  </Card>
+</CardGroup>
+
+## What is Snipit?
+
+Snipit gives you a personal music locker that you share with a circle of people you choose. There are no public profiles, no discovery feeds, and no social graph — just private groups where members upload and listen to tracks together.
+
+Each group has its own track list and member roster. You control who joins by sharing an invite link. Members can upload MP3 or MP4 audio files up to 50 MB, and everyone in the group can stream those tracks directly in the browser without downloading anything.
+
+## Key features
+
+<CardGroup cols={2}>
+  <Card title="Invite-only groups" icon="lock">
+    Create named groups with a description and share a unique invite link. Only people with the link can join.
+  </Card>
+  <Card title="MP3 and MP4 uploads" icon="arrow-up-from-bracket">
+    Upload audio files up to 50 MB directly from your device. Files are stored securely in cloud storage.
+  </Card>
+  <Card title="In-browser playback" icon="play">
+    Stream tracks instantly in the browser. No downloads, no plugins, no extra apps required.
+  </Card>
+  <Card title="Music library" icon="list-music">
+    Each group maintains its own track list with title, artist, upload date, and the name of who shared it.
+  </Card>
+  <Card title="Activity dashboard" icon="gauge">
+    Your dashboard shows recently uploaded tracks from all your groups so you can catch up at a glance.
+  </Card>
+  <Card title="Member management" icon="user-plus">
+    See who is in each group. Invite new members at any time by generating a fresh invite link.
+  </Card>
+</CardGroup>
+
+## Tech stack
+
+Snipit is built with a modern, self-hostable stack:
+
+| Layer | Technology |
+|---|---|
+| Framework | [Next.js](https://nextjs.org/) 14 (App Router) |
+| Authentication | [Supabase Auth](https://supabase.com/docs/guides/auth) via Google OAuth |
+| Database | [Supabase](https://supabase.com/) (PostgreSQL) |
+| File storage | [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) |
+| Styling | [Tailwind CSS](https://tailwindcss.com/) |
+| UI components | [Radix UI](https://www.radix-ui.com/) primitives |
+| State management | [Zustand](https://zustand-demo.pmnd.rs/) |
+| Data fetching | [SWR](https://swr.vercel.app/) |
+
+<Note>
+  Snipit uses Google OAuth for authentication. Users sign in with their Google account — there is no email/password registration flow.
+</Note>
+
+## Who is Snipit for?
+
+Snipit is for small, trusted groups of people who want to share audio files privately. Common use cases include:
+
+- **Friend groups** sharing original music, demos, or recordings with each other
+- **Collaborators** exchanging work-in-progress tracks without uploading to a public platform
+- **Music enthusiasts** curating a shared collection of local files with a small circle
+
+Snipit is not a public streaming service. There is no discovery, no public profiles, and no way for strangers to access your groups. Every group is invite-only.
+
+## How it works
+
+<Steps>
+  <Step title="Sign in with Google">
+    Go to `/login` and click **Continue with Google**. Snipit uses Supabase Auth to handle authentication — no password required.
+  </Step>
+  <Step title="Create a group">
+    From your dashboard, click **Create Group**. Give it a name and an optional description. The group appears in your dashboard immediately.
+  </Step>
+  <Step title="Upload a track">
+    Open the group and click **Upload Track**. Select an MP3 or MP4 file (up to 50 MB), enter the track title and artist name, and submit. The file is stored in Vercel Blob and the metadata is saved to Supabase.
+  </Step>
+  <Step title="Invite members">
+    Click **Invite Members** inside the group to generate an invite link. Share the link with anyone you want to add. When they open the link, they are automatically added to the group after signing in.
+  </Step>
+  <Step title="Listen together">
+    Every member of the group can see the shared tracks and play them in the browser. Your dashboard shows recently uploaded tracks across all your groups.
+  </Step>
+</Steps>
+
+## Self-hosting
+
+Snipit is open source and designed to be self-hosted. You bring your own Supabase project for authentication and the database, configure Vercel Blob for file storage, and deploy to Vercel or any Next.js-compatible host.
+
+<CardGroup cols={2}>
+  <Card title="Self-hosting overview" icon="server" href="/self-hosting/overview">
+    Understand the architecture and what you need to run your own instance.
+  </Card>
+  <Card title="Supabase setup" icon="database" href="/self-hosting/supabase-setup">
+    Configure the required tables, storage buckets, and auth providers in Supabase.
+  </Card>
+  <Card title="Environment variables" icon="key" href="/self-hosting/environment-variables">
+    All the environment variables required to connect Snipit to your services.
+  </Card>
+  <Card title="Deployment" icon="cloud-arrow-up" href="/self-hosting/deployment">
+    Deploy to Vercel or another Next.js-compatible platform.
+  </Card>
+</CardGroup>

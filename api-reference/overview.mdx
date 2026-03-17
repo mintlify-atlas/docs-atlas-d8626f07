@@ -1,0 +1,69 @@
+---
+title: 'API overview'
+description: 'Reference for all Snippet HTTP API endpoints and server actions.'
+---
+
+Snippet exposes a small set of HTTP endpoints under the `/api` path. These are Next.js Route Handlers that run server-side and talk directly to Supabase.
+
+<Note>
+  Snippet also uses Next.js **server actions** for some data operations (for example, `uploadMusic` and `downloadMedia`). These are called internally by the client and are documented here for self-hosters who need to understand the full data flow.
+</Note>
+
+## Base URL
+
+All endpoints are relative to your deployment root:
+
+```
+https://<your-domain>/api
+```
+
+When running locally the base URL is `http://localhost:3000/api`.
+
+## Authentication
+
+All endpoints require an active Supabase session. Authentication is carried via the session cookie that Supabase sets after a user signs in — there are no API keys.
+
+If your session cookie is missing or expired, the server will return a `401` or redirect you to the login page depending on the endpoint.
+
+<Warning>
+  Never share your session cookie. Treat it with the same care as a password.
+</Warning>
+
+## Available endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/groups` | List all groups a user belongs to |
+| `POST` | `/api/groups` | Create a new group |
+| `POST` | `/api/upload-file` | Upload an audio file to Supabase storage |
+| `GET` | `/api/download-content` | Stub endpoint (downloads handled via direct storage URLs) |
+| `POST` | `/api/confirm-invite` | Add an authenticated user to a group via an invite link |
+
+## Error format
+
+All error responses return JSON with a single `error` key:
+
+```json
+{
+  "error": "A human-readable description of what went wrong."
+}
+```
+
+HTTP status codes follow standard conventions — `400` for bad input, `401` for unauthenticated requests, and `500` for server-side failures.
+
+## Endpoint pages
+
+<CardGroup cols={2}>
+  <Card title="Groups" icon="users" href="/api-reference/groups">
+    Create groups and fetch group memberships.
+  </Card>
+  <Card title="Upload file" icon="upload" href="/api-reference/upload-file">
+    Upload audio tracks to Supabase storage.
+  </Card>
+  <Card title="Download content" icon="download" href="/api-reference/download-content">
+    Download tracks via Supabase storage URLs.
+  </Card>
+  <Card title="Confirm invite" icon="user-plus" href="/api-reference/confirm-invite">
+    Accept a group invitation and add a member.
+  </Card>
+</CardGroup>
