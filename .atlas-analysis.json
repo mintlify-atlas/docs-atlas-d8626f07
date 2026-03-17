@@ -1,0 +1,78 @@
+{
+  "projectType": "saas",
+  "projectName": "Snippet",
+  "projectDescription": "A web app for uploading and sharing MP3 files with friends through private groups.",
+  "theme": "almond",
+  "primaryColor": "#1DB954",
+  "lightColor": "#1DB954",
+  "darkColor": "#17a349",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["introduction", "quickstart"]
+          },
+          {
+            "group": "Core Features",
+            "pages": [
+              "features/groups",
+              "features/uploading-tracks",
+              "features/music-library",
+              "features/inviting-members"
+            ]
+          },
+          {
+            "group": "Self-Hosting",
+            "pages": [
+              "self-hosting/overview",
+              "self-hosting/supabase-setup",
+              "self-hosting/environment-variables",
+              "self-hosting/deployment"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "API Endpoints",
+            "pages": [
+              "api-reference/overview",
+              "api-reference/groups",
+              "api-reference/upload-file",
+              "api-reference/download-content",
+              "api-reference/confirm-invite"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Upload and share MP3 files with friends in private groups",
+    "Create and manage music sharing groups",
+    "Invite members to groups via email",
+    "Personal music library with search functionality",
+    "In-browser audio playback",
+    "Dashboard with recently uploaded tracks across all groups",
+    "Supabase-powered authentication and file storage"
+  ],
+  "publicApiSurface": [
+    "GET /api/groups?user_id={userId} — list groups for a user",
+    "POST /api/groups — create a new group",
+    "POST /api/upload-file — upload an MP3 file to Supabase storage",
+    "GET /api/download-content — download a track",
+    "POST /api/confirm-invite — confirm a group invitation",
+    "Server Action: uploadFileToSupabase(file: File)",
+    "Server Action: uploadMusic(fileMetadata, title, artist, groupId)",
+    "Server Action: getTracksForGroup(groupId)",
+    "Server Action: getTracksFromUser(userId)",
+    "Server Action: getTracksFromAllGroups(userId)",
+    "Server Action: searchTracks(query)",
+    "Server Action: getGroupMembers(groupId)"
+  ]
+}
