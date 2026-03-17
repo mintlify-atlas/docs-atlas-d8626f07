@@ -30,10 +30,14 @@ CREATE TABLE public.groups (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name        text NOT NULL,
   description text,
-  created_by  uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+  created_by  text,
   created_at  timestamptz NOT NULL DEFAULT now()
 );
 ```
+
+<Note>
+  The `created_by` column stores the creator's email address as a plain text string, not a UUID. This matches the API implementation which inserts `userEmail` at group creation time.
+</Note>
 
 ### `group_members`
 

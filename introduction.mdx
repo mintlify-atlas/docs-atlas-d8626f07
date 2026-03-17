@@ -58,7 +58,7 @@ Snipit is built with a modern, self-hostable stack:
 | Framework | [Next.js](https://nextjs.org/) 14 (App Router) |
 | Authentication | [Supabase Auth](https://supabase.com/docs/guides/auth) via Google OAuth |
 | Database | [Supabase](https://supabase.com/) (PostgreSQL) |
-| File storage | [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) |
+| File storage | [Supabase Storage](https://supabase.com/docs/guides/storage) (the `mp4` bucket) |
 | Styling | [Tailwind CSS](https://tailwindcss.com/) |
 | UI components | [Radix UI](https://www.radix-ui.com/) primitives |
 | State management | [Zustand](https://zustand-demo.pmnd.rs/) |
@@ -88,7 +88,7 @@ Snipit is not a public streaming service. There is no discovery, no public profi
     From your dashboard, click **Create Group**. Give it a name and an optional description. The group appears in your dashboard immediately.
   </Step>
   <Step title="Upload a track">
-    Open the group and click **Upload Track**. Select an MP3 or MP4 file (up to 50 MB), enter the track title and artist name, and submit. The file is stored in Vercel Blob and the metadata is saved to Supabase.
+    Open the group and click **Upload Track**. Select an MP3 or MP4 file (up to 50 MB), enter the track title and artist name, and submit. The file is stored in Supabase Storage and the metadata is saved to Supabase.
   </Step>
   <Step title="Invite members">
     Click **Invite Members** inside the group to generate an invite link. Share the link with anyone you want to add. When they open the link, they are automatically added to the group after signing in.
@@ -100,7 +100,7 @@ Snipit is not a public streaming service. There is no discovery, no public profi
 
 ## Self-hosting
 
-Snipit is open source and designed to be self-hosted. You bring your own Supabase project for authentication and the database, configure Vercel Blob for file storage, and deploy to Vercel or any Next.js-compatible host.
+Snipit is open source and designed to be self-hosted. You bring your own Supabase project for authentication, the database, and file storage, and deploy to Vercel or any Next.js-compatible host.
 
 <CardGroup cols={2}>
   <Card title="Self-hosting overview" icon="server" href="/self-hosting/overview">

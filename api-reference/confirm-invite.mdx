@@ -15,7 +15,13 @@ The `/api/confirm-invite` endpoint completes the invite flow by inserting the au
     The `/invite_user` page loads in the recipient's browser. It reads `group_id` from the query string and validates that the group exists by querying the `groups` table directly via the Supabase client.
   </Step>
   <Step title="Authentication check">
-    If the recipient is not signed in, the page redirects them to `/login?redirect=/invite_user?group_id=<group-uuid>`. After signing in, they are returned to the invite page automatically.
+    If the recipient is not signed in, the page redirects them to the login page with the invite URL encoded as a `redirect` query parameter:
+
+    ```text
+    /login?redirect=%2Finvite_user%3Fgroup_id%3D<group-uuid>
+    ```
+
+    After signing in with Google, the auth callback returns them to the invite page automatically.
   </Step>
   <Step title="Confirm invite API called">
     The page calls `POST /api/confirm-invite` with the authenticated user's UUID and the group UUID.

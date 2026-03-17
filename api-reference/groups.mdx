@@ -42,8 +42,8 @@ Returns all group memberships for a given user, including nested group details.
         <ResponseField name="name" type="string">
           Display name of the group.
         </ResponseField>
-        <ResponseField name="created_by" type="string">
-          Email address of the user who created the group.
+        <ResponseField name="created_by" type="string | null">
+          Email address of the user who created the group. Stored as a plain string (not a UUID).
         </ResponseField>
         <ResponseField name="description" type="string">
           Optional description of the group.
@@ -52,6 +52,14 @@ Returns all group memberships for a given user, including nested group details.
     </ResponseField>
   </Expandable>
 </ResponseField>
+
+**Missing `user_id` (no HTTP status code)**
+
+Returns plain text (not JSON):
+
+```text
+No user id provided
+```
 
 **500 Internal Server Error**
 
@@ -96,8 +104,8 @@ Creates a new group and adds the creator as its first member.
   Display name for the new group.
 </ParamField>
 
-<ParamField body="description" type="string" required>
-  A short description of the group.
+<ParamField body="description" type="string">
+  An optional description of the group. Stored as `null` if omitted.
 </ParamField>
 
 <ParamField body="userEmail" type="string" required>

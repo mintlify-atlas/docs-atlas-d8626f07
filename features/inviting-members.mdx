@@ -29,7 +29,7 @@ Any existing member of a group can invite others by sharing a unique invite link
 
 Every invite link follows this pattern:
 
-```
+```text
 https://<your-domain>/invite_user?group_id=<group-uuid>
 ```
 
@@ -42,13 +42,13 @@ The `group_id` query parameter contains the UUID of the target group. The link i
     The `/invite_user` page reads the `group_id` from the URL and queries the `groups` table to confirm the group exists. If the group ID is missing or does not match any record, the page shows an **Invalid Invitation** error and redirects to the dashboard after 3 seconds.
   </Step>
   <Step title="Authentication check">
-    Snippet checks whether the recipient is signed in. If they are not, they are redirected to the login page with the invite URL preserved as a `redirect` parameter:
+    Snippet checks whether the recipient is signed in. If they are not, they are redirected to the login page with the invite URL URL-encoded as a `redirect` parameter:
 
-    ```
+    ```text
     /login?redirect=%2Finvite_user%3Fgroup_id%3D<group-uuid>
     ```
 
-    After signing in, Snippet returns them to the invite URL automatically.
+    After signing in with Google, the auth callback redirects them back to the invite URL automatically.
   </Step>
   <Step title="Joining the group">
     Once authenticated, the page calls `POST /api/confirm-invite` with the user's ID and the group ID. The API inserts a row into the `group_members` table:

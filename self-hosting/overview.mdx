@@ -13,7 +13,7 @@ The three components that make up a Snippet deployment:
 |---|---|---|
 | Web application | Next.js 14 (App Router) | Serves the UI and runs server actions |
 | Auth & database | Supabase (PostgreSQL + GoTrue) | User accounts, groups, tracks, and upload metadata |
-| File storage | Supabase Storage | Stores the actual audio files in the `mp4` bucket |
+| File storage | Supabase Storage (`mp4` bucket) | Stores the actual uploaded audio files |
 
 All three components communicate over HTTPS. The Next.js application uses the Supabase JavaScript client (`@supabase/ssr`) from both the browser and server-side server actions. A middleware layer runs on every request to refresh the Supabase session cookie before the page renders.
 

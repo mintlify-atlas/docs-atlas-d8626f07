@@ -41,7 +41,7 @@ If your session cookie is missing or expired, the server will return a `401` or 
 
 ## Error format
 
-All error responses return JSON with a single `error` key:
+Most error responses return JSON with a single `error` key:
 
 ```json
 {
@@ -50,6 +50,10 @@ All error responses return JSON with a single `error` key:
 ```
 
 HTTP status codes follow standard conventions — `400` for bad input, `401` for unauthenticated requests, and `500` for server-side failures.
+
+<Note>
+  The `GET /api/groups` endpoint returns a plain-text response (not JSON) when the `user_id` query parameter is missing: `"No user id provided"`. All other error responses are JSON.
+</Note>
 
 ## Endpoint pages
 
